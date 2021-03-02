@@ -8,13 +8,13 @@
  * registers the activation and deactivation functions, and defines a function
  * that starts the plugin.
  *
- * @link              https://github.com/Orinwebsolutions
+ * @link              https://github.com/Orinwebsolutions/wc-product-rest-api-addon
  * @since             1.0.0
  * @package           Wc_Product_Rest_Api_Addon
  *
  * @wordpress-plugin
  * Plugin Name:       WC Product rest API addon
- * Plugin URI:        https://github.com/Orinwebsolutions
+ * Plugin URI:        https://github.com/Orinwebsolutions/wc-product-rest-api-addon
  * Description:       This is a short description of what the plugin does. It's displayed in the WordPress admin area.
  * Version:           1.0.0
  * Author:            Amila
@@ -42,6 +42,9 @@ define( 'WC_PRODUCT_REST_API_ADDON_VERSION', '1.0.0' );
  * This action is documented in includes/class-wc-product-rest-api-addon-activator.php
  */
 function activate_wc_product_rest_api_addon() {
+	if (!is_plugin_active('woocommerce-tm-extra-product-options/tm-woo-extra-product-options.php')){
+		die('Plugin NOT activated, because WooCommerce TM Extra Product Options is not activated in your site, Please activate WooCommerce TM Extra Product Options plugin!!');
+	}
 	require_once plugin_dir_path( __FILE__ ) . 'includes/class-wc-product-rest-api-addon-activator.php';
 	Wc_Product_Rest_Api_Addon_Activator::activate();
 }
