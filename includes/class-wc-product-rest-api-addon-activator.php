@@ -31,6 +31,18 @@ class Wc_Product_Rest_Api_Addon_Activator {
 	 */
 	public static function activate() {
 
+		// require_once plugin_dir_path( __FILE__ ) . '/class-wc-product-rest-api-addon-deactivator.php';
+
+		// Wc_Product_Rest_Api_Addon_Deactivator::deactivate();
+		// $deactivate = new Wc_Product_Rest_Api_Addon_Deactivator();
+		// $deactivate->deactivate();
+		// if (!is_plugin_active('woocommerce-tm-extra-product-options/tm-woo-extra-product-options.php'))
+		// {
+
+		// 	require_once plugin_dir_path( __FILE__ ) . 'class-wc-product-rest-api-addon-deactivator.php';
+		// 	Wc_Product_Rest_Api_Addon_Deactivator::deactivate();
+		// }
+		
 	}
 
 }

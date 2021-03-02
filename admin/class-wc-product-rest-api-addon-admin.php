@@ -100,4 +100,76 @@ class Wc_Product_Rest_Api_Addon_Admin {
 
 	}
 
+
+	// filter the product response here
+	function wc_api_add_custom_data_to_product( $response, $post, $request ) {
+		// in this case we want to display the short description, so we copy it over to the description, which shows up in the app
+		$tm_custom_data = [];
+		$acceptable_elements = ['textfield', 'textarea', 'selectbox', 'radiobuttons', 'range'];
+		$tm_meta = get_post_meta($post->get_id(), 'tm_meta', true);
+		if($tm_meta){
+			$element_types = $tm_meta['tmfbuilder']['element_type'];
+			for ($i=0; $i <= (count($element_types)-1); $i++) { 
+				$tempArray = [];
+				foreach ($tm_meta['tmfbuilder'] as $tm_metakey => $tm_metavalue) {
+					$element_type = $element_types[$i];
+					if(!in_array($element_type, $acceptable_elements)){//This is ignore other html elements
+						break;
+					}
+
+					$compareArr = [
+						"{$element_type}_header_title",
+						"{$element_type}_min",
+						"{$element_type}_max",
+						"multiple_{$element_type}_options_value",
+						"multiple_{$element_type}_options_price",
+						"multiple_{$element_type}_options_sale_price"
+					];
+
+					if(!in_array($tm_metakey, $compareArr)){
+						continue;
+					}
+					// error_log($element_type);
+					switch ($tm_metakey) {
+						case "{$element_type}_header_title":
+							$tempArray['_title'] = $tm_metavalue;
+							break;
+						case "{$element_type}_min":
+							$tempArray['_range_min'] = $tm_metavalue;
+							break;
+						case "{$element_type}_max":
+							$tempArray['_range_max'] = $tm_metavalue;
+							break;															
+						case "multiple_{$element_type}_options_value":
+							$tempArray['_options_value'] = $tm_metavalue;
+							break;
+						case "multiple_{$element_type}_options_price":
+							$tempArray['_options_price'] = $tm_metavalue;
+							break;
+						case "multiple_{$element_type}_options_sale_price":
+							$tempArray['_options_sale_price'] = $tm_metavalue;
+							break;
+						default:
+							break;
+					}
+				}
+				if($tempArray){
+					$tm_custom_data[$element_type] = $tempArray;
+				}
+				
+			}
+			// error_log(print_r($tm_custom_data, true));
+			// error_log(print_r($post, true));
+			$response->data['tm_product_custom_data'] = $tm_custom_data;
+		}
+		return $response;
+  
+  	}
+
+	// function wc_api_add_custom_data_to_product_v1( $product_data, $product, $fields, $this_server ) {
+	// 	// retrieve a custom field and add it to API response
+	// 	$product_data['your_new_key_2'] = 'Radini please show this';
+	// 	return $product_data;
+	// }
+
 }
