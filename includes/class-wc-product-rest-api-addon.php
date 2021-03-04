@@ -156,7 +156,7 @@ class Wc_Product_Rest_Api_Addon {
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
-		$this->loader->add_filter( 'woocommerce_rest_prepare_product_object', $plugin_admin, 'wc_api_add_custom_data_to_product', 10, 3 );
+		$this->loader->add_filter( 'woocommerce_rest_prepare_product_object', $plugin_admin, 'wc_api_add_custom_data_to_product', 40, 3 );
 		// $this->loader->add_filter( 'woocommerce_api_product_response', $plugin_admin, 'wc_api_add_custom_data_to_product_v1', 10, 4 );
 
 	}
