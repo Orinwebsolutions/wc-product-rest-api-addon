@@ -123,6 +123,7 @@ class Wc_Product_Rest_Api_Addon_Admin {
 
 				$tempArray = [];
 				$field_keys = [];
+				$field_values = [];
 
 				foreach ($tm_meta['tmfbuilder'] as $tm_metakey => $tm_metavalue) {
 
@@ -132,13 +133,14 @@ class Wc_Product_Rest_Api_Addon_Admin {
 					}
 
 					$compareArr = [
-						"{$element_type}_header_title",
+						// "{$element_type}_header_title",
 						// "{$element_type}_min",
 						// "{$element_type}_max",
 						"multiple_{$element_type}_options_value",
 						// "multiple_{$element_type}_options_price",
 						// "multiple_{$element_type}_options_sale_price",
 						// "multiple_{$element_type}_options_title"
+						"{$element_type}_uniqid",
 						"{$element_type}_internal_name"
 					];
 
@@ -147,17 +149,30 @@ class Wc_Product_Rest_Api_Addon_Admin {
 					}
 					
 					switch ($tm_metakey) {
-						case "{$element_type}_header_title":
-							$tempArray['_title'] = $tm_metavalue;
-							break;												
+						// case "{$element_type}_header_title":
+						// 	$tempArray['_title'] = $tm_metavalue;
+						// 	break;	
+						case "{$element_type}_uniqid":
+							$tempArray['_uniqid'] = $tm_metavalue;
+							// var_dump($tempArray['_uniqid']);
+							// echo '<br/>';
+							// var_dump($tm_metavalue);
+							break;																			
 						case "multiple_{$element_type}_options_value":
 							
 							if($element_type == 'checkboxes'){
 								$fieldkey = $acceptable_elements["{$element_type}"];
 								for ($x=0; $x < count($tm_metavalue[0]) ; $x++) {
 									array_push($field_keys,"tmcp_{$fieldkey}_{$i}_{$x}");
+									array_push($field_values,"{$tm_metavalue[0][$x]}_{$x}");
 								}
 								$tempArray['_keys'] = $field_keys;
+								$tempArray['_options_value'] = $field_values;
+							}else{
+								for ($x=0; $x < count($tm_metavalue[0]) ; $x++) {
+									array_push($field_values,"{$tm_metavalue[0][$x]}_{$x}");
+									$tempArray['_options_value'] = $field_values;
+								}
 							}
 
 							break;	
@@ -202,11 +217,26 @@ class Wc_Product_Rest_Api_Addon_Admin {
 				}
 
 				if($tempArray){
-					$tm_custom_data[$element_type] = $tempArray;
+					// $tm_custom_data[$element_type] = $tempArray;
+					$id = $tempArray['_uniqid'][0];
+					unset($tempArray['_uniqid']);
+					$tm_custom_data[$id] = $tempArray;
 				}
 				
 			}
-			$response->data['tm_product_custom_data'] = $tm_custom_data;
+			$newOptions = [];
+			foreach ($response->data['options'] as $key => $optionsArry) {
+				$options = [];
+				if (array_key_exists($optionsArry['id'][0], $tm_custom_data)){
+					$optionsArry['_keys'] = $tm_custom_data[$optionsArry['id'][0]]['_keys'];
+					$optionsArry['_options_value'] = $tm_custom_data[$optionsArry['id'][0]]['_options_value'];
+				}
+
+				array_push($newOptions, $optionsArry);
+
+			}
+			$response->data['options']  = $newOptions;
+			// $response->data['tm_product_custom_data'] = $tm_custom_data;
 		}
 		return $response;
   
