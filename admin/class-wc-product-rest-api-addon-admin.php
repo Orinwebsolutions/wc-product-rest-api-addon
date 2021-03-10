@@ -105,8 +105,6 @@ class Wc_Product_Rest_Api_Addon_Admin {
 	function wc_api_add_custom_data_to_product( $response, $post, $request ) {
 		// in this case we want to display the short description, so we copy it over to the description, which shows up in the app
 		$tm_custom_data = [];
-		// $acceptable_elements = ['textfield', 'textarea', 'selectbox', 'radiobuttons', 'range', 'checkboxes'];
-		// $acceptable_elements = ['textfield', 'textarea', 'selectbox', 'radiobuttons', 'checkboxes'];
 		$acceptable_elements = [ 
 			'textfield'=>'textfield', 
 			'textarea'=>'textarea', 
@@ -133,52 +131,57 @@ class Wc_Product_Rest_Api_Addon_Admin {
 					}
 
 					$compareArr = [
-						// "{$element_type}_header_title",
-						// "{$element_type}_min",
-						// "{$element_type}_max",
+						"{$element_type}_header_title",
 						"multiple_{$element_type}_options_value",
-						// "multiple_{$element_type}_options_price",
-						// "multiple_{$element_type}_options_sale_price",
-						// "multiple_{$element_type}_options_title"
-						"{$element_type}_uniqid",
 						"{$element_type}_internal_name"
 					];
 
 					if(!in_array($tm_metakey, $compareArr)){
 						continue;
 					}
-					
+
 					switch ($tm_metakey) {
-						// case "{$element_type}_header_title":
-						// 	$tempArray['_title'] = $tm_metavalue;
-						// 	break;	
-						case "{$element_type}_uniqid":
-							$tempArray['_uniqid'] = $tm_metavalue;
-							// var_dump($tempArray['_uniqid']);
-							// echo '<br/>';
-							// var_dump($tm_metavalue);
+						case "{$element_type}_header_title":
+							if($tm_metavalue[$i]){
+								$tempArray['_title'] = $tm_metavalue[$i];
+							}else{
+								$tempArray['_title'] = $tm_metavalue[0];
+							}
 							break;																			
 						case "multiple_{$element_type}_options_value":
-							
 							if($element_type == 'checkboxes'){
 								$fieldkey = $acceptable_elements["{$element_type}"];
-								for ($x=0; $x < count($tm_metavalue[0]) ; $x++) {
-									array_push($field_keys,"tmcp_{$fieldkey}_{$i}_{$x}");
-									array_push($field_values,"{$tm_metavalue[0][$x]}_{$x}");
+								if($tm_metavalue[$i]){
+									for ($x=0; $x < count($tm_metavalue[$i]) ; $x++) {
+										array_push($field_keys,"tmcp_{$fieldkey}_{$i}_{$x}");
+										array_push($field_values,"{$tm_metavalue[$i][$x]}_{$x}");
+									}
+								}else{
+									for ($x=0; $x < count($tm_metavalue[0]) ; $x++) {
+										array_push($field_keys,"tmcp_{$fieldkey}_{$i}_{$x}");
+										array_push($field_values,"{$tm_metavalue[0][$x]}_{$x}");
+									}
 								}
 								$tempArray['_keys'] = $field_keys;
 								$tempArray['_options_value'] = $field_values;
 							}else{
-								for ($x=0; $x < count($tm_metavalue[0]) ; $x++) {
-									array_push($field_values,"{$tm_metavalue[0][$x]}_{$x}");
-									$tempArray['_options_value'] = $field_values;
+								if($tm_metavalue[$i]){
+									for ($x=0; $x < count($tm_metavalue[$i]) ; $x++) {
+										array_push($field_values,"{$tm_metavalue[$i][$x]}_{$x}");
+									}
+								}else{
+									for ($x=0; $x < count($tm_metavalue[0]) ; $x++) {
+										array_push($field_values,"{$tm_metavalue[0][$x]}_{$x}");
+									}
 								}
+								$tempArray['_options_value'] = $field_values;
 							}
 
 							break;	
 						case "{$element_type}_internal_name":
 
 							if($element_type != 'checkboxes'){
+
 								$fieldkey = $acceptable_elements["{$element_type}"];
 								if(!empty($tm_custom_data[$element_type]['_keys'])){
 									if(is_array($tm_custom_data[$element_type]['_keys'])){//Verify if array exists
@@ -193,43 +196,26 @@ class Wc_Product_Rest_Api_Addon_Admin {
 							}
 
 							break;
-						// case "{$element_type}_min":
-						// 	$tempArray['_range_min'] = $tm_metavalue;
-						// 	break;
-						// case "{$element_type}_max":
-						// 	$tempArray['_range_max'] = $tm_metavalue;
-						// 	break;															
-						// case "multiple_{$element_type}_options_title":
-						// 	$tempArray['_options_title'] = $tm_metavalue;
-						// 	break;							
-						// case "multiple_{$element_type}_options_value":
-						// 	$tempArray['_options_value'] = $tm_metavalue;
-						// 	break;
-						// case "multiple_{$element_type}_options_price":
-						// 	$tempArray['_options_price'] = $tm_metavalue;
-						// 	break;
-						// case "multiple_{$element_type}_options_sale_price":
-						// 	$tempArray['_options_sale_price'] = $tm_metavalue;
-						// 	break;
 						default:
 							break;
 					}
 				}
 
+
 				if($tempArray){
-					// $tm_custom_data[$element_type] = $tempArray;
-					$id = $tempArray['_uniqid'][0];
-					unset($tempArray['_uniqid']);
-					$tm_custom_data[$id] = $tempArray;
+					$_title = $tempArray['_title'];
+					unset($tempArray['_title']);
+					$tm_custom_data[$_title] = $tempArray;
 				}
 				
 			}
+
 			$newOptions = [];
 			foreach ($response->data['options'] as $key => $optionsArry) {
 				$options = [];
-				if (array_key_exists($optionsArry['id'][0], $tm_custom_data)){
-					$optionsArry['_keys'] = $tm_custom_data[$optionsArry['id'][0]]['_keys'];
-					$optionsArry['_options_value'] = $tm_custom_data[$optionsArry['id'][0]]['_options_value'];
+				if (array_key_exists($optionsArry['title'], $tm_custom_data)){
+					$optionsArry['_keys'] = $tm_custom_data[$optionsArry['title']]['_keys'];
+					$optionsArry['_options_value'] = $tm_custom_data[$optionsArry['title']]['_options_value'];
 				}
 
 				array_push($newOptions, $optionsArry);
